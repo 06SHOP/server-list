@@ -24,25 +24,11 @@
             margin-bottom: 20px;
         }
         input[type="text"] {
-            width: 70%;
+            width: 100%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #2980b9;
         }
         #results {
             background-color: white;
@@ -70,7 +56,6 @@
     
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Entrez des lettres (ex: re, ami, etc.)">
-        <button onclick="searchWords()">Rechercher</button>
     </div>
     
     <div id="results">
@@ -184,7 +169,7 @@
             
             // Vérifier si le terme de recherche est vide
             if (searchTerm === '') {
-                resultsDiv.innerHTML = '<p>Veuillez entrer des lettres pour rechercher.</p>';
+                resultsDiv.innerHTML = '<p>Les mots contenant votre séquence de lettres apparaîtront ici.</p>';
                 return;
             }
             
@@ -222,11 +207,9 @@
             }
         }
 
-        // Permettre la recherche en appuyant sur Entrée
-        document.getElementById('searchInput').addEventListener('keyup', function(event) {
-            if (event.key === 'Enter') {
-                searchWords();
-            }
+        // Effectuer une recherche en temps réel lorsque l'utilisateur tape
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchWords();
         });
     </script>
 </body>
