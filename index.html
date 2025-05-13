@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chercheur de Mots</title>
+    <title>ChercheUrMot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -39,6 +39,7 @@
             font-size: 16px;
             cursor: pointer;
             margin-left: 10px;
+            transition: background-color 0.3s ease;
         }
         button:hover {
             background-color: #2980b9;
@@ -65,7 +66,7 @@
     </style>
 </head>
 <body>
-    <h1>Chercheur de Mots</h1>
+    <h1>ChercheUrMot</h1>
     
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Entrez des lettres (ex: re, ami, etc.)">
@@ -184,6 +185,12 @@
             // Vérifier si le terme de recherche est vide
             if (searchTerm === '') {
                 resultsDiv.innerHTML = '<p>Veuillez entrer des lettres pour rechercher.</p>';
+                return;
+            }
+            
+            // Vérifier si le terme de recherche est trop court
+            if (searchTerm.length < 2) {
+                resultsDiv.innerHTML = '<p>Veuillez entrer au moins 2 lettres pour rechercher.</p>';
                 return;
             }
             
