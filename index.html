@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chercheur de Mots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .search-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #results {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-height: 200px;
+        }
+        .word {
+            display: inline-block;
+            background-color: #eef7ff;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 3px;
+            border: 1px solid #cce5ff;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chercheur de Mots</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Entrez des lettres (ex: re, ami, etc.)">
+        <button onclick="searchWords()">Rechercher</button>
+    </div>
+    
+    <div id="results">
+        <p>Les mots contenant votre séquence de lettres apparaîtront ici.</p>
+    </div>
+
+    <script>
+        // Liste de mots français communs
+        const frenchWords = [
+            "abri", "accord", "achat", "acteur", "action", "adresse", "affaire", "agent", "aide", "aimer",
+            "air", "album", "aller", "ami", "amour", "an", "ancien", "animal", "année", "appareil",
+            "appel", "arbre", "argent", "art", "article", "artiste", "attendre", "attention", "au", "aucun",
+            "auteur", "autre", "avant", "avec", "avenue", "avoir", "balle", "banque", "bas", "bateau",
+            "beau", "bébé", "besoin", "bien", "blanc", "bleu", "boire", "bonjour", "bon", "bonjour",
+            "bord", "bouche", "bouger", "bout", "bras", "briser", "bureau", "but", "café", "calme",
+            "camarade", "campagne", "car", "carte", "cas", "casser", "cause", "ce", "cela", "celui",
+            "centre", "certain", "cerveau", "chaise", "chambre", "chance", "changer", "chanter", "chaque", "charger",
+            "chat", "chaud", "chef", "chemin", "cher", "chercher", "cheval", "cheveu", "chez", "chien",
+            "choisir", "chose", "ciel", "clair", "classe", "clé", "client", "cœur", "coin", "colère",
+            "collège", "combien", "comme", "commencer", "comment", "compagnie", "complet", "comprendre", "compte", "conduire",
+            "connaître", "conseil", "content", "contre", "copain", "corps", "côté", "couleur", "coup", "cour",
+            "courir", "cours", "court", "couvrir", "craindre", "créer", "croire", "cuisine", "dame", "danger",
+            "dans", "danser", "de", "début", "dehors", "déjà", "demander", "dent", "depuis", "dernier",
+            "descendre", "désir", "détail", "détruire", "deux", "devant", "devenir", "devoir", "différent", "difficile",
+            "dire", "directeur", "direction", "divers", "dix", "docteur", "doigt", "domaine", "donc", "donner",
+            "dormir", "dos", "double", "douche", "douleur", "doute", "doux", "douze", "droit", "du",
+            "dur", "eau", "école", "écouter", "écrire", "effet", "égal", "élève", "elle", "éloigner",
+            "embrasser", "emmener", "émotion", "en", "encore", "endroit", "énergie", "enfant", "enfer", "enfin",
+            "engager", "enlever", "ennemi", "ensemble", "ensuite", "entendre", "entier", "entre", "entrer", "envoyer",
+            "époque", "équipe", "erreur", "espace", "espèce", "espérer", "espoir", "esprit", "essayer", "est",
+            "et", "été", "être", "étudiant", "étude", "événement", "exact", "examen", "exemple", "exister",
+            "expérience", "expliquer", "expression", "face", "facile", "façon", "faible", "faim", "faire", "fait",
+            "falloir", "famille", "fatigué", "faute", "femme", "fenêtre", "fer", "fermer", "fête", "feu",
+            "feuille", "fidèle", "fier", "figure", "fil", "fille", "film", "fin", "finir", "fleur",
+            "fois", "fond", "force", "forêt", "forme", "fort", "fou", "frais", "français", "frapper",
+            "frère", "froid", "front", "fruit", "fuir", "fumée", "fumer", "gagner", "garçon", "garde",
+            "garder", "gare", "gauche", "général", "genou", "genre", "gens", "gentil", "geste", "glace",
+            "glisser", "goût", "goutte", "gouvernement", "grand", "grave", "gris", "gros", "groupe", "guerre",
+            "guider", "habiter", "habitude", "haut", "heure", "heureux", "histoire", "hiver", "homme", "honneur",
+            "honte", "hôpital", "hors", "hôtel", "humain", "humeur", "ici", "idée", "il", "image",
+            "imaginer", "important", "impression", "inconnu", "indiquer", "information", "installer", "instant", "intéresser", "intérêt",
+            "intérieur", "inviter", "jamais", "jambe", "jardin", "jaune", "je", "jeter", "jeu", "jeune",
+            "joie", "joli", "jouer", "jour", "journal", "journée", "juge", "jusqu'à", "juste", "justice",
+            "la", "là", "lac", "laisser", "lait", "langue", "large", "larme", "le", "léger",
+            "lendemain", "lent", "lettre", "leur", "lever", "lèvre", "libre", "lien", "lieux", "ligne",
+            "lire", "lisser", "lit", "livre", "livrer", "loi", "loin", "long", "lors", "lorsque",
+            "lourd", "lui", "lumière", "lundi", "lune", "lutte", "machine", "madame", "main", "maintenant",
+            "mais", "maison", "maître", "mal", "malade", "malgré", "maman", "manger", "manière", "manquer",
+            "marché", "marcher", "mari", "mariage", "marquer", "matin", "mauvais", "médecin", "meilleur", "membre",
+            "même", "mémoire", "menacer", "mener", "mentir", "menu", "mer", "merci", "mère", "mesure",
+            "métier", "mettre", "midi", "mien", "mieux", "milieu", "militaire", "mille", "million", "mine",
+            "minute", "miser", "mode", "moi", "moins", "mois", "moment", "mon", "monde", "monnaie",
+            "monsieur", "montagne", "monter", "montrer", "morceau", "mort", "mot", "mourir", "mouvement", "moyen",
+            "mur", "musique", "naître", "nation", "nature", "ne", "nécessaire", "nerveux", "neuf", "nez",
+            "ni", "niveau", "noir", "nom", "nombre", "non", "normal", "noter", "notre", "nourrir",
+            "nous", "nouveau", "nu", "nuage", "nuit", "nul", "objet", "occasion", "occupation", "occuper",
+            "odeur", "œil", "œuvre", "officier", "offrir", "oh", "oiseau", "ombre", "on", "oncle",
+            "or", "ordre", "oreille", "oser", "ou", "oublier", "oui", "ouvert", "ouvrage", "ouvrir",
+            "page", "pain", "paix", "palais", "papa", "papier", "paquet", "par", "parent", "parfois",
+            "parler", "parmi", "parole", "part", "partager", "partie", "partir", "partout", "parvenir", "pas",
+            "passage", "passé", "passer", "passion", "patron", "pauvre", "payer", "pays", "peau", "peine",
+            "pencher", "pendant", "pénétrer", "penser", "perdre", "père", "permettre", "personne", "petit", "peu",
+            "peur", "photo", "phrase", "pièce", "pied", "pierre", "place", "plafond", "plage", "plaindre",
+            "plaire", "plan", "plante", "plein", "pleurer", "plonger", "pluie", "plus", "plusieurs", "poche",
+            "poète", "poids", "point", "police", "politique", "pomme", "pont", "port", "porte", "porter",
+            "poser", "position", "possible", "poste", "pour", "pourquoi", "pousser", "pouvoir", "précieux", "précis",
+            "préférer", "premier", "prendre", "préparer", "près", "présent", "presque", "presser", "prêt", "preuve",
+            "prier", "prince", "principe", "prison", "prix", "problème", "prochain", "produire", "professeur", "profiter",
+            "profond", "progrès", "projet", "promener", "promettre", "prononcer", "propos", "propre", "protéger", "prouver",
+            "public", "puis", "puisque", "puissance", "pur", "qualité", "quand", "quant", "quarante", "quart",
+            "quartier", "quatre", "que", "quel", "quelque", "quelqu'un", "question", "quitter", "quoi", "race",
+            "raconter", "raison", "ramasser", "ramener", "rang", "rapide", "rappeler", "rapport", "rare", "rassurer",
+            "rater", "ravir", "réaliser", "recevoir", "recherche", "réclamer", "recommencer", "reconnaître", "recueillir", "reculer",
+            "réduire", "réel", "refuser", "regard", "regarder", "régime", "région", "règle", "regretter", "rejeter",
+            "rejoindre", "relation", "relever", "religion", "remarquer", "remercier", "remettre", "remonter", "remplacer", "remplir",
+            "rencontre", "rencontrer", "rendre", "renoncer", "rentrer", "renverser", "répandre", "repas", "répéter", "répondre",
+            "réponse", "reposer", "repousser", "reprendre", "représenter", "réserver", "résoudre", "respect", "respirer", "ressembler",
+            "reste", "rester", "résultat", "retard", "retenir", "retirer", "retour", "retourner", "retrouver", "réunir",
+            "réussir", "rêve", "réveiller", "révéler", "revenir", "rêver", "revoir", "révolution", "riche", "rideau",
+            "rien", "rire", "risquer", "robe", "roche", "roi", "roman", "rompre", "rond", "rose",
+            "rouge", "rouler", "route", "rue", "ruine", "sable", "sac", "sacrifice", "sage", "saint",
+            "saisir", "saison", "salle", "saluer", "salut", "sang", "sans", "santé", "satisfaire", "sauter",
+            "sauvage", "sauver", "savoir", "scène", "science", "se", "sec", "second", "secours", "secret",
+            "secrétaire", "sécurité", "seigneur", "sein", "selon", "semaine", "semblable", "sembler", "semer", "sens",
+            "sentir", "séparer", "sept", "série", "sérieux", "serrer", "service", "servir", "seul", "seulement",
+            "si", "siècle", "siège", "sien", "signe", "signifier", "silence", "silencieux", "simple", "sincère",
+            "situation", "six", "social", "société", "soi", "soin", "soir", "soirée", "soit", "sol",
+            "soldat", "soleil", "solitude", "sombre", "somme", "sommeil", "sommet", "son", "songer", "sonner",
+            "sorte", "sortir", "sou", "soudain", "souffler", "souffrance", "souffrir", "souhaiter", "soulever", "soumettre",
+            "source", "sourd", "sourire", "sous", "soutenir", "souvenir", "souvent", "special", "spectacle", "subir",
+            "succès", "sueur", "suffire", "suite", "suivant", "suivre", "sujet", "supérieur", "supporter", "supposer",
+            "sur", "sûr", "surprise", "surtout", "surveiller", "système", "table", "tache", "taille", "taire",
+            "tandis", "tant", "tard", "te", "tel", "tellement", "témoin", "tempête", "temps", "tendre",
+            "tenir", "tenter", "terme", "terminer", "terrain", "terre", "terreur", "terrible", "tête", "texte",
+            "théâtre", "thème", "tirer", "titre", "toi", "toile", "toit", "tomber", "ton", "toucher",
+            "toujours", "tour", "tourner", "tout", "trace", "train", "trait", "traiter", "tranquille", "transformer",
+            "travail", "travailler", "travers", "traverser", "trembler", "trente", "très", "trésor", "triste", "trois",
+            "tromper", "trop", "troubler", "trou", "trouver", "tu", "tuer", "type", "un", "unique",
+            "unir", "usage", "user", "utiliser", "vacances", "vague", "vaincre", "valeur", "valoir", "vaste",
+            "veille", "veiller", "vendre", "venir", "vent", "ventre", "vérifier", "vérité", "verre", "vers",
+            "verser", "vert", "vêtement", "victime", "vide", "vie", "vieillard", "vieux", "vif", "village",
+            "ville", "vin", "vingt", "violence", "visage", "visible", "vision", "visite", "vite", "vivant",
+            "vivre", "voici", "voie", "voilà", "voir", "voisin", "voiture", "voix", "vol", "voler",
+            "volonté", "votre", "vouloir", "vous", "voyage", "voyager", "vrai", "vue", "yeux", "zone"
+        ];
+
+        // Fonction pour rechercher des mots contenant une séquence de lettres
+        function searchWords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('results');
+            
+            // Vérifier si le terme de recherche est vide
+            if (searchTerm === '') {
+                resultsDiv.innerHTML = '<p>Veuillez entrer des lettres pour rechercher.</p>';
+                return;
+            }
+            
+            // Filtrer les mots qui contiennent la séquence de lettres
+            const matchingWords = frenchWords.filter(word => word.includes(searchTerm));
+            
+            // Afficher les résultats
+            if (matchingWords.length > 0) {
+                let output = `<p>Résultats pour "${searchTerm}" (${matchingWords.length} mots trouvés):</p>`;
+                
+                // Afficher chaque mot avec la séquence de lettres mise en évidence
+                matchingWords.forEach(word => {
+                    const parts = word.split(searchTerm);
+                    let highlightedWord = '';
+                    
+                    for (let i = 0; i < parts.length; i++) {
+                        highlightedWord += parts[i];
+                        if (i < parts.length - 1) {
+                            highlightedWord += `<span class="highlight">${searchTerm}</span>`;
+                        }
+                    }
+                    
+                    output += `<div class="word">${highlightedWord}</div>`;
+                });
+                
+                resultsDiv.innerHTML = output;
+            } else {
+                resultsDiv.innerHTML = `<p>Aucun mot contenant "${searchTerm}" n'a été trouvé.</p>`;
+            }
+        }
+
+        // Permettre la recherche en appuyant sur Entrée
+        document.getElementById('searchInput').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                searchWords();
+            }
+        });
+    </script>
+</body>
+</html>
